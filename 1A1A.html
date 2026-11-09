@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>幾A幾B版本四｜雲端紀錄</title><style>
+    :root {font-family:system-ui,"Microsoft JhengHei",sans-serif;color:#23443d;background:#f4f2e9;line-height:1.7}
+    * {box-sizing:border-box}
+    body {margin:0;min-height:100vh;display:grid;place-items:center;padding:28px 16px}
+    main {width:min(100%,1100px)}
+    .eyebrow {margin:0 0 8px;font-size:13px;letter-spacing:.12em;color:#576b5f}
+    h1 {font-size:clamp(32px,7vw,46px);line-height:1.25;margin:0 0 14px}
+    .intro {margin:0 0 24px;color:#50645b}
+    .card {padding:clamp(24px,5vw,38px);background:#fff;border:1px solid #d1dcd1;border-radius:26px;box-shadow:0 16px 50px #274b3e0a}
+    .range {display:flex;align-items:center;justify-content:center;gap:22px;padding:10px 0 20px;font-size:36px;font-weight:750}
+    .range span {color:#839487;font-size:22px;font-weight:400}
+    label {display:block;font-weight:650;margin-bottom:10px}
+    input {width:100%;font:700 36px/1.4 system-ui;text-align:center;padding:14px;border:2px solid #a3b9ac;border-radius:14px;color:#23443d;background:#fbfcf8}
+    input::placeholder {color:#9ba69e;font-weight:400}
+    button {font:inherit;font-weight:650;border-radius:12px;padding:13px 18px;cursor:pointer;min-height:50px}
+    .submit {width:100%;margin-top:14px;border:1px solid #315e4f;background:#315e4f;color:white}
+    .reset {border:1px solid #a6b9ab;color:#315e4f;background:transparent}
+    button:disabled {opacity:.5;cursor:default}
+    :focus-visible {outline:3px solid #a86731;outline-offset:4px}
+    #feedback {display:flex;align-items:center;justify-content:center;text-align:center;min-height:94px;border-radius:14px;background:#edf2eb;padding:18px;margin:24px 0;color:#355a4b;font-size:20px;font-weight:650}
+    #feedback[data-tone=error] {background:#f8e9e1;color:#853b29}
+    #feedback[data-tone=win] {background:#dcebd7;color:#28512a}
+    .footer {display:flex;gap:18px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+    .note {font-size:13px;color:#5b6b61;margin:22px 4px 0}
+    .small {font-size:14px;color:#5b6b61}
+    @media(prefers-reduced-motion:no-preference) {button{transition:background .15s}.submit:hover:not(:disabled){background:#244d40}}
+  
+    .layout {display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:24px;align-items:start}
+    h2 {margin:0 0 14px;font-size:22px}
+    .stats {display:flex;gap:12px;flex-wrap:wrap;margin:0 0 18px;color:#476251}
+    details {border:1px solid #d1dcd1;border-radius:14px;margin:12px 0;background:#fbfcf8;overflow:hidden}
+    summary {padding:15px;cursor:pointer;font-weight:650}
+    .round-content {padding:0 15px 15px}
+    .table-wrap {overflow:auto}
+    table {border-collapse:collapse;width:100%;font-size:15px;text-align:left}
+    caption {text-align:left;padding-bottom:8px;font-size:14px;color:#5b6b61}
+    th,td {padding:9px 8px;border-bottom:1px solid #dce5da;white-space:nowrap}
+    th {font-weight:650;background:#edf2eb}
+    .round-meta {font-size:13px;color:#5b6b61}
+    @media(max-width:800px){.layout{grid-template-columns:1fr}}
+  
+[hidden]{display:none!important}.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:18px 0}.status{padding:14px 18px;border:1px solid #c9d7ce;border-radius:14px;background:#e8f1e8;min-height:56px;margin:18px 0}.status[data-tone=error]{background:#f8e9e1;color:#853b29}.status[data-tone=busy]{background:#edf0f4;color:#3b5260}#code{font-size:24px;text-align:left}.gate{max-width:620px;margin:24px auto}.tag{padding:6px 12px;border-radius:8px;background:#e7ede4;font-size:14px}.resume{margin:12px 0;font-size:14px}.notice{padding:16px;background:#eeeade;border-radius:12px;font-size:14px;color:#5d5447}.status-actions{display:flex;gap:10px;flex-wrap:wrap}.empty{padding:20px 0;color:#5b6b61}
+</style></head><body>
+<main>
+  <p class="eyebrow">數位科技概論 · 版本四 · 幾 A 幾 B · GAS 雲端紀錄</p>
+  <h1>你猜，雲端記得。</h1>
+  <p class="intro">猜四位不重複的數字（0～9，可以 0 開頭）。使用同一個 Google 帳號回來，繼續自己的遊戲。</p>
+  <p class="notice">這個遊戲使用 Google 授權。第一次建立存檔時，會在你目前帳號的雲端硬碟新增一份私人 Google 試算表；不會自動分享給其他玩家。</p>
+  <p id="cloud-status" class="status" role="status" aria-live="polite" aria-atomic="true">正在確認 Google 帳號與存檔…</p>
+  <div id="recovery" class="status-actions" hidden><button id="retry" class="reset" type="button">重試同一操作</button><button id="recover-load" class="reset" type="button">重新讀取雲端</button></div>
+  <p id="identity" class="tag">尚未確認帳號</p>
+  <section id="gate" class="card gate">
+    <h2>建立你的個人遊戲存檔</h2>
+    <p>按下方按鈕後，程式才會建立「猜數字版本四｜我的遊戲存檔」，儲存你的 Google 帳號、每局答案、猜測歷程與時間。之後以同一帳號開同一網站，就會找回這份檔案。</p>
+    <p class="small">Google 的試算表授權範圍比這一份遊戲檔案更廣，並非「只允許這一份」。本教材程式只操作自己建立的遊戲存檔，不會自動將檔案分享給老師。請只授權你信任的程式。</p>
+    <p class="small">若不願建立，直接關閉頁面即可。若要撤回先前的 Google 授權，可到 Google 帳戶的第三方連結管理頁面處理；撤權不會自動刪除已建立的試算表。</p>
+    <button id="create" class="submit" type="button" disabled>建立我的遊戲存檔</button>
+    <button id="check" class="reset" type="button">重新確認帳號與存檔</button>
+  </section>
+  <section id="app" hidden>
+    <div class="toolbar"><span id="player" class="tag"></span><button id="reload" class="reset" type="button">重新讀取</button><a id="sheet-link" target="_blank" rel="noopener noreferrer" hidden>開啟我的試算表</a></div>
+    <div class="stats"><span id="total">共 0 局</span><span id="wins">猜對 0 局</span></div>
+    <div class="layout">
+      <section class="card" aria-label="幾A幾B遊戲">
+        <h2 id="round-title">還沒有遊戲</h2>
+        <div class="range" aria-hidden="true">? ? ? ?</div>
+        <form id="guess-form" novalidate>
+          <label for="guess">你猜的四位數字（不可重複）</label>
+          <input id="guess" type="text" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="例如 0123" aria-describedby="feedback" disabled>
+          <button id="submit" class="submit" type="submit" disabled>猜看看並儲存</button>
+        </form>
+        <p id="feedback" role="status" aria-live="polite">請先開新局。</p>
+        <div class="status-actions">
+          <button id="new" class="reset" type="button">開新局（保留舊局）</button>
+          <button id="debug" class="reset" type="button" aria-pressed="false">除錯模式：關閉</button>
+        </div>
+        <p id="debug-answer" class="small" role="status" aria-live="polite" hidden></p>
+        <p class="small">A 表示數字與位置都對；B 表示數字對但位置不同。每次有效猜測自動存到雲端。看到「已儲存」再離開；輸入框內尚未送出的數字不會存檔。</p>
+      </section>
+      <section class="card" aria-labelledby="history-title">
+        <h2 id="history-title">雲端遊玩歷史</h2>
+        <p class="small">選取未完成的局繼續；猜對的局保留完整紀錄。</p>
+        <div id="history"></div>
+      </section>
+    </div>
+    <p id="limits" class="note"></p>
+  </section>
+  <p class="note">資料儲存在目前 Google 帳號的試算表。切換帳號請使用另一個瀏覽器設定檔或只登入另一帳號的私密視窗，再開同一網址。這個網頁不會幫你登出 Google。</p>
+</main>
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const online = typeof google !== 'undefined' && google.script && google.script.run;
+let ready=false;
+let player = '', rounds = [], selectedId = null, busy = false, pending = null;
+let debugOn = false, debugGameId = null, debugAnswer = null;
+function current() { return rounds.find(r => r.id === selectedId) || null; }
+function uid() { return typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : 'req-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2); }
+function parseGuess(value) {
+  const text = String(value).trim();
+  if (!text) throw new Error('請輸入四位數字；這次不會存入紀錄。');
+  if (!/^\d+$/.test(text)) throw new Error('只能輸入 0～9 的數字；這次不會存入紀錄。');
+  if (text.length !== 4) throw new Error('必須剛好四位數字（可以 0 開頭）；這次不會存入紀錄。');
+  if (new Set(text.split('')).size !== 4) throw new Error('四個數字不可重複；這次不會存入紀錄。');
+  return text;
+}
+function status(text,tone='') { $('cloud-status').textContent=text; $('cloud-status').dataset.tone=tone; }
+function make(tag,text,className) { const el=document.createElement(tag); if(text!==undefined)el.textContent=text; if(className)el.className=className; return el; }
+function time(iso) { return new Date(iso).toLocaleString('zh-TW',{hour12:false}); }
+function label(result) { return result.a + 'A' + result.b + 'B'; }
+function controls() {
+  document.querySelectorAll('button,input').forEach(el => el.disabled=!!busy || !online);
+  const game=current(), unresolved=!!pending;
+  $('guess').disabled=$('submit').disabled=busy || !online || unresolved || !game || game.status!=='playing' || game.guesses.length>=100;
+  $('new').disabled=busy || !online || unresolved || !ready || rounds.length>=50;
+  $('create').disabled=busy || unresolved || !online || !player || ready;
+  $('debug').disabled=busy || !online || unresolved || !ready || !game;
+  $('recovery').hidden=!unresolved;
+  $('history').querySelectorAll('button').forEach(b => b.disabled=busy || unresolved);
+}
+function renderHistory() {
+  const open = new Set([...$('history').querySelectorAll('details[open]')].map(el=>el.dataset.round));
+  $('history').replaceChildren();
+  if (!rounds.length) { $('history').append(make('p','這個帳號還沒有遊戲紀錄。按「開新局」開始。','empty')); return; }
+  [...rounds].reverse().forEach(game => {
+    const details=make('details'); details.dataset.round=game.id;
+    details.open=open.has(game.id) || game.id===selectedId;
+    details.append(make('summary','第 '+game.number+' 局 · '+(game.status==='won'?'已猜對':'未完成')+' · '+game.guesses.length+' 次猜測'));
+    const box=make('div',undefined,'round-content');
+    box.append(make('p','開始：'+time(game.startedAt),'round-meta'));
+    box.append(make('p','最近儲存：'+time(game.updatedAt),'round-meta'));
+    if(game.status==='won') box.append(make('p','答案：'+game.answer+'｜完成：'+time(game.endedAt),'round-meta'));
+    const choose=make('button',game.id===selectedId?'目前選取的局':game.status==='won'?'查看這一局':'繼續這一局','reset resume');
+    choose.type='button'; choose.addEventListener('click',()=>{if(busy||pending)return; if(selectedId!==game.id)resetDebug(); selectedId=game.id; $('guess').value=''; render(); if(game.status==='playing')$('guess').focus();}); box.append(choose);
+    if(!game.guesses.length)box.append(make('p','尚未猜測。','small'));
+    else {
+      const wrap=make('div',undefined,'table-wrap'),table=make('table'),head=make('thead'),tr=make('tr'),body=make('tbody');
+      table.append(make('caption','第 '+game.number+' 局的猜測歷程'));
+      ['次序','數字','結果','時間'].forEach(t=>{const th=make('th',t);th.scope='col';tr.append(th);});head.append(tr);table.append(head);
+      game.guesses.forEach(g=>{const row=make('tr');[g.order,g.value,label(g.result),new Date(g.at).toLocaleTimeString('zh-TW',{hour12:false})].forEach(v=>row.append(make('td',String(v))));body.append(row);});table.append(body);wrap.append(table);box.append(wrap);
+    }
+    details.append(box);$('history').append(details);
+  });
+}
+function render() {
+  $('gate').hidden=ready; $('app').hidden=!ready;
+  $('identity').textContent=player?'目前 Google 帳號：'+player:'尚未確認 Google 帳號';
+  $('player').textContent='Google 帳號：'+player;
+  $('total').textContent='共 '+rounds.length+' 局'; $('wins').textContent='猜對 '+rounds.filter(r=>r.status==='won').length+' 局';
+  const game=current();
+  $('round-title').textContent=game?'第 '+game.number+' 局':'還沒有遊戲';
+  if(!game){$('feedback').textContent='請先開新局。';$('feedback').dataset.tone='';}
+  else if(game.status==='won'){$('feedback').textContent='已猜對！答案 '+game.answer+'，共 '+game.guesses.length+' 次。';$('feedback').dataset.tone='win';}
+  else{const last=game.guesses[game.guesses.length-1];$('feedback').textContent=last?'上一次：'+last.value+'，'+label(last.result)+'。繼續猜吧！':'新局已準備好，請猜一組四位數字。';$('feedback').dataset.tone='';}
+  renderHistory();renderDebug();controls();
+}
+function resetDebug() { debugOn=false; debugGameId=null; debugAnswer=null; }
+function renderDebug() {
+  const game=current();
+  if(debugOn && debugGameId!==selectedId) resetDebug();
+  $('debug').textContent='除錯模式：'+(debugOn?'開啟':'關閉');
+  $('debug').setAttribute('aria-pressed',String(debugOn));
+  const box=$('debug-answer');
+  if(!debugOn || !game){box.hidden=true;box.textContent='';return;}
+  const answer=game.status==='won'?game.answer:debugAnswer;
+  box.hidden=false;
+  box.textContent=answer?'除錯：本局答案 '+answer+'（取自雲端存檔）':'除錯：正在讀取答案…';
+}
+async function toggleDebug() {
+  if(busy||pending||!online||!ready)return;
+  if(debugOn){resetDebug();render();return;}
+  const game=current(); if(!game)return;
+  debugOn=true;debugGameId=game.id;debugAnswer=null;render();
+  if(game.status!=='playing')return;
+  busy=true;controls();status('正在從雲端讀取本局答案…','busy');
+  try {
+    const res=await callServer({action:'debug',gameId:game.id});
+    if(res&&res.ok&&debugOn&&debugGameId===res.debugGameId){debugAnswer=res.debugAnswer;status('已顯示雲端答案；關閉除錯模式即可隱藏。');}
+    else{resetDebug();status(res&&res.error?res.error:'讀取答案失敗。','error');}
+  } catch(error) {
+    resetDebug();status('讀取答案失敗，請稍後再試。','error');
+  } finally { busy=false;render(); }
+}
+function callServer(request) {
+  return new Promise((resolve,reject) => google.script.run.withSuccessHandler(resolve).withFailureHandler(reject).api(request));
+}
+async function send(request) {
+  if(busy||!online)return;
+  busy=true; controls();status(request.action==='load'?'正在讀取雲端資料…':'正在處理並儲存，請稍候…','busy');
+  try {
+    const response=await callServer(request);
+    if(!response || !response.ok) {
+      pending=response&&response.uncertain?request:null;
+      status(response&&response.error?response.error:'雲端回覆不完整，請重新讀取。','error');
+      return;
+    }
+    pending=null;
+    const prevSelected=selectedId;
+    if(player!==response.code){selectedId=null;resetDebug();}
+    player=response.code;ready=response.ready;rounds=response.rounds;
+    const requested=response.selectedId || selectedId;
+    selectedId=rounds.some(r=>r.id===requested)?requested:([...rounds].reverse().find(r=>r.status==='playing') || rounds[rounds.length-1] || {}).id || null;
+    if(selectedId!==prevSelected)resetDebug();
+    $('sheet-link').hidden=!response.sheetUrl;
+    if(response.sheetUrl)$('sheet-link').href=response.sheetUrl;
+    else $('sheet-link').removeAttribute('href');
+    $('limits').textContent='課堂範例每個帳號最多 '+response.limits.rounds+' 局、每局 '+response.limits.guesses+' 次猜測；不會自動刪除舊紀錄。';
+    if(request.action!=='load')$('guess').value='';
+    render();status(response.message,response.conflict?'error':'');
+  } catch(error) {
+    pending=request;
+    status('尚未確認雲端結果，請重試同一操作或重新讀取。不要把尚未確認的結果當成已存檔。','error');
+  } finally { busy=false;controls(); }
+}
+$('create').addEventListener('click',()=>{if(!busy&&!pending&&player&&!ready)send({action:'create',consent:true});});
+$('check').addEventListener('click',()=>send({action:'load'}));
+$('new').addEventListener('click',()=>{if(!player||pending)return;send({action:'new',requestId:uid()});});
+$('debug').addEventListener('click',toggleDebug);
+$('guess-form').addEventListener('submit',e=>{e.preventDefault();if(busy||pending)return;const game=current();if(!game||game.status!=='playing')return;try{const value=parseGuess($('guess').value);$('guess').removeAttribute('aria-invalid');send({action:'guess',gameId:game.id,revision:game.revision,value,requestId:uid()});}catch(error){$('guess').setAttribute('aria-invalid','true');status(error.message,'error');}});
+$('reload').addEventListener('click',()=>{if(player&&!busy)send({action:'load',});});
+$('retry').addEventListener('click',()=>{if(pending&&!busy)send(pending);});
+$('recover-load').addEventListener('click',()=>{if(pending&&!busy)send({action:'load',});});
+window.addEventListener('beforeunload',event=>{if(busy||pending){event.preventDefault();event.returnValue='';}});
+render();
+if(!online)status('這是 GAS 網頁素材，本機不能連線。請依講義將 Code.gs 與 Index.html 放進 GAS，以「存取者」身分部署，再開 /exec 網址。','error');
+if(online)send({action:'load'});
+</script></body></html>
